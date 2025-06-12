@@ -9,6 +9,7 @@ ctk.set_default_color_theme("blue")
 
 # Variables to hold image data
 image_array = None
+original_image_array = None  # Store the original unmodified array
 original_image = None  # To store the original image
 processed_image = None  # To store the processed image
 ny, nx = 0, 0
@@ -71,7 +72,7 @@ def HTinv(image_array, iteration):
 
 # Load and process image
 def load_image():
-    global image_array, original_image, ny, nx
+    global image_array, original_image_array, original_image, ny, nx
     file_path = filedialog.askopenfilename(title="Select an Image File", filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.bmp")])
     if not file_path:
         print("No file selected.")
@@ -79,16 +80,20 @@ def load_image():
 
     # Load the image in RGB
     image = Image.open(file_path).convert('RGB')
-    image_array = np.asarray(image, dtype=np.float32)
+    original_image_array = np.asarray(image, dtype=np.float32)  # Store original data
+    image_array = original_image_array.copy()  # Working copy
     ny, nx, _ = image_array.shape  # Get the dimensions (height, width, channels)
     original_image = image  # Keep the original color image for display
     display_image(original_image, original_canvas)
 
 def process_image():
-    global processed_image
-    if image_array is None:
+    global processed_image, image_array
+    if original_image_array is None:
         print("No image loaded.")
         return
+
+    # Always start with a fresh copy of the original data
+    image_array = original_image_array.copy()
 
     # Use the slider values
     threshold = threshold_slider.get()
